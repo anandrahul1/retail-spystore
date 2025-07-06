@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spy Gadgets Store - Secret Agent Equipment</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Inline Chat Widget Styles */
+        .chat-widget-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: none;
+        }
+
+        .chat-widget-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .chat-widget-button.chat-open {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .chat-icon {
+            font-size: 24px;
+            color: white;
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-avatar {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .chat-title h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .chat-status {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .chat-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-message.user-message {
+            align-items: flex-end;
+        }
+
+        .chat-message.bot-message {
+            align-items: flex-start;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-btn {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .suggestion-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input-wrapper input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .chat-input-wrapper input:focus {
+            border-color: #667eea;
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .chat-send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .chat-welcome {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🕵️ Spy Gadgets Store</h1>
+                    <p>Premium Equipment for Secret Agents</p>
+                </div>
+                <div class="header-right">
+                    <div id="auth-buttons" class="auth-buttons">
+                        <button id="show-login" class="btn btn-secondary">Sign In</button>
+                        <button id="show-register" class="btn btn-primary">Sign Up</button>
+                    </div>
+                    <div id="user-info" class="user-info" style="display: none;">
+                        <!-- User info will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" onclick="showSection('products')">🛍️ Products</button>
+                <button class="nav-btn" onclick="showSection('cart')">🛒 Cart (<span id="cart-count">0</span>)</button>
+                <button class="nav-btn" onclick="showSection('orders')">📦 Orders</button>
+                <button class="nav-btn" onclick="showSection('checkout')">💳 Checkout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Products Section -->
+            <section id="products" class="section active">
+                <h2>🛍️ Available Products</h2>
+                <div id="products-status" class="status-message">Loading products...</div>
+                <div id="products-list" class="products-grid">
+                    <!-- Products will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Cart Section -->
+            <section id="cart" class="section">
+                <h2>🛒 Shopping Cart</h2>
+                <div id="cart-status-text" class="status-message">Loading cart...</div>
+                <div id="cart-items" class="cart-container">
+                    <!-- Cart items will be loaded here -->
+                </div>
+                <div class="cart-total">
+                    <h3>Total: <span id="cart-total">$0.00</span></h3>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders" class="section">
+                <h2>📦 Order History</h2>
+                <div id="orders-status-text" class="status-message">Loading orders...</div>
+                <div id="orders-list" class="orders-container">
+                    <!-- Orders will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Checkout Section -->
+            <section id="checkout" class="section">
+                <h2>💳 Checkout</h2>
+                <div id="checkout-status-text" class="status-message">Loading checkout options...</div>
+                <div id="checkout-form" class="checkout-container">
+                    <!-- Checkout form will be loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>🔒 Classified Operations Only | 🌐 Microservices Architecture Demo</p>
+            <div class="service-status">
+                <span class="status-item">Catalog: <span id="catalog-status">🔄</span></span>
+                <span class="status-item">Cart: <span id="cart-status">🔄</span></span>
+                <span class="status-item">Orders: <span id="orders-status">🔄</span></span>
+                <span class="status-item">Checkout: <span id="checkout-status">🔄</span></span>
+                <span class="status-item">Auth: <span id="auth-status">🔄</span></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Authentication Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            
+            <!-- Login Section -->
+            <div id="login-section" class="auth-section">
+                <h2>🔐 Sign In</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" id="login-btn" class="btn btn-primary">Sign In</button>
+                </form>
+                <p class="auth-switch">
+                    Don't have an account? <a href="#" id="switch-to-register">Sign up here</a>
+                </p>
+            </div>
+
+            <!-- Register Section -->
+            <div id="register-section" class="auth-section" style="display: none;">
+                <h2>📝 Create Account</h2>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-firstName">First Name:</label>
+                        <input type="text" id="register-firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-lastName">Last Name:</label>
+                        <input type="text" id="register-lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email:</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password:</label>
+                        <input type="password" id="register-password" name="password" required>
+                        <small>Must be 8+ characters with uppercase, lowercase, and numbers</small>
+                    </div>
+                    <button type="submit" id="register-btn" class="btn btn-primary">Create Account</button>
+                </form>
+                <p class="auth-switch">
+                    Already have an account? <a href="#" id="switch-to-login">Sign in here</a>
+                </p>
+            </div>
+
+            <!-- Email Verification Section -->
+            <div id="verify-section" class="auth-section" style="display: none;">
+                <h2>📧 Verify Email</h2>
+                <p>Please check your email and enter the verification code below:</p>
+                <form id="verify-form">
+                    <div class="form-group">
+                        <label for="verify-email">Email:</label>
+                        <input type="email" id="verify-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="verify-code">Verification Code:</label>
+                        <input type="text" id="verify-code" name="code" required>
+                    </div>
+                    <button type="submit" id="verify-btn" class="btn btn-primary">Verify Email</button>
+                </form>
+                <p class="auth-switch">
+                    <a href="#" id="switch-to-login">Back to Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <button id="chat-widget-button" class="chat-widget-button">
+        <div class="chat-icon">🤖</div>
+    </button>
+
+    <!-- Chat Window -->
+    <div id="chat-window" class="chat-window">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-avatar">🕵️</div>
+                <div class="chat-title">
+                    <h4>AI Shopping Assistant</h4>
+                    <span class="chat-status">Online</span>
+                </div>
+            </div>
+            <button id="chat-close" class="chat-close">×</button>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-welcome">
+                Welcome! I'm your AI shopping assistant. How can I help you find the perfect spy gadgets today?
+            </div>
+            <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <div class="chat-suggestions" id="chat-suggestions">
+                <button class="suggestion-btn" data-message="Show me spy watches">🕰️ Spy Watches</button>
+                <button class="suggestion-btn" data-message="Find gadgets under $300">💰 Under $300</button>
+                <button class="suggestion-btn" data-message="What's the best surveillance equipment?">🔍 Surveillance</button>
+                <button class="suggestion-btn" data-message="Help me compare products">⚖️ Compare</button>
+            </div>
+            <div class="chat-input-wrapper">
+                <input type="text" id="chat-input" placeholder="Ask about spy gadgets..." maxlength="500">
+                <button id="chat-send" class="chat-send-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Inline Chat Manager
+        class InlineChatManager {
+            constructor() {
+                this.apiUrl = window.location.origin;
+                this.conversationId = null;
+                this.isOpen = false;
+                this.isTyping = false;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.showWelcomeMessage();
+            }
+
+            setupEventListeners() {
+                const widgetButton = document.getElementById('chat-widget-button');
+                const closeButton = document.getElementById('chat-close');
+                const sendButton = document.getElementById('chat-send');
+                const inputField = document.getElementById('chat-input');
+                const suggestions = document.querySelectorAll('.suggestion-btn');
+
+                if (widgetButton) {
+                    widgetButton.addEventListener('click', () => this.toggleChat());
+                }
+
+                if (closeButton) {
+                    closeButton.addEventListener('click', () => this.closeChat());
+                }
+
+                if (sendButton) {
+                    sendButton.addEventListener('click', () => this.sendMessage());
+                }
+
+                if (inputField) {
+                    inputField.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.sendMessage();
+                        }
+                    });
+                }
+
+                suggestions.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const message = btn.getAttribute('data-message');
+                        this.sendPredefinedMessage(message);
+                    });
+                });
+            }
+
+            toggleChat() {
+                const chatWindow = document.getElementById('chat-window');
+                const widgetButton = document.getElementById('chat-widget-button');
+                
+                if (this.isOpen) {
+                    this.closeChat();
+                } else {
+                    this.openChat();
+                }
+            }
+
+            openChat() {
+                const chatWindow = document.getElementById('chat-window');
+                const widgetButton = document.getElementById('chat-widget-button');
+                
+                chatWindow.style.display = 'flex';
+                widgetButton.classList.add('chat-open');
+                this.isOpen = true;
+                this.scrollToBottom();
+            }
+
+            closeChat() {
+                const chatWindow = document.getElementById('chat-window');
+                const widgetButton = document.getElementById('chat-widget-button');
+                
+                chatWindow.style.display = 'none';
+                widgetButton.classList.remove('chat-open');
+                this.isOpen = false;
+            }
+
+            showWelcomeMessage() {
+                // Welcome message is already in HTML
+            }
+
+            async sendMessage() {
+                const inputField = document.getElementById('chat-input');
+                const message = inputField.value.trim();
+                
+                if (!message) return;
+                
+                this.displayUserMessage(message);
+                inputField.value = '';
+                this.hideSuggestions();
+                
+                await this.sendToAI(message);
+            }
+
+            async sendPredefinedMessage(message) {
+                this.displayUserMessage(message);
+                await this.sendToAI(message);
+                this.hideSuggestions();
+            }
+
+            async sendToAI(message) {
+                try {
+                    this.showTyping();
+                    
+                    const userId = window.authManager?.getCurrentUser()?.userId || 'anonymous';
+                    
+                    // Start a new conversation if we don't have one
+                    if (!this.conversationId) {
+                        const startResponse = await fetch(`${this.apiUrl}/chat/start`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                userId: userId
+                            })
+                        });
+                        
+                        const startData = await startResponse.json();
+                        if (startData.success) {
+                            this.conversationId = startData.conversationId;
+                        } else {
+                            this.displayErrorMessage('Failed to start conversation');
+                            return;
+                        }
+                    }
+                    
+                    const response = await fetch(`${this.apiUrl}/chat/message`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            conversationId: this.conversationId,
+                            message: message,
+                            userId: userId
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Handle message object with content property
+                        const messageText = typeof data.message === 'string' ? data.message : data.message.content;
+                        this.displayMessage(messageText);
+                        if (data.conversationId) {
+                            this.conversationId = data.conversationId;
+                        }
+                    } else {
+                        this.displayErrorMessage(data.message || 'Failed to get response');
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    this.displayErrorMessage('I apologize, but I\\'m having trouble connecting to my AI brain right now. Please try again in a moment!');
+                } finally {
+                    this.hideTyping();
+                }
+            }
+
+            displayUserMessage(message) {
+                const messagesContainer = document.getElementById('chat-messages');
+                const messageHTML = `
+                    <div class="chat-message user-message">
+                        <div class="message-content">${this.escapeHtml(message)}</div>
+                        <div class="message-time">${this.formatTime(new Date())}</div>
+                    </div>
+                `;
+                messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+                this.scrollToBottom();
+            }
+
+            displayMessage(message) {
+                const messagesContainer = document.getElementById('chat-messages');
+                const messageHTML = `
+                    <div class="chat-message bot-message">
+                        <div class="message-content">${this.escapeHtml(message)}</div>
+                        <div class="message-time">${this.formatTime(new Date())}</div>
+                    </div>
+                `;
+                messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+                this.scrollToBottom();
+            }
+
+            displayErrorMessage(message) {
+                this.displayMessage(message);
+            }
+
+            showTyping() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.style.display = 'flex';
+                    this.scrollToBottom();
+                }
+                this.isTyping = true;
+            }
+
+            hideTyping() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.style.display = 'none';
+                }
+                this.isTyping = false;
+            }
+
+            hideSuggestions() {
+                const suggestions = document.getElementById('chat-suggestions');
+                if (suggestions) {
+                    suggestions.style.display = 'none';
+                }
+            }
+
+            scrollToBottom() {
+                const messagesContainer = document.getElementById('chat-messages');
+                if (messagesContainer) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            formatTime(date) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+
+        // Initialize chat when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            window.chatManager = new InlineChatManager();
+        });
+    </script>
+</body>
+</html>
