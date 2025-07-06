@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # UI Service - Frontend
+  ui-service:
+    build: ./ui-service
+    ports:
+      - "3000:80"
+    depends_on:
+      - ai-chatbot-service
+      - catalog-service
+      - cart-service
+    environment:
+      - NODE_ENV=development
+    networks:
+      - retail-network
+
+  # AI Chatbot Service - Amazon Bedrock powered
+  ai-chatbot-service:
+    build: ./ai-chatbot-service
+    ports:
+      - "3001:80"
+    depends_on:
+      - catalog-service
+      - cart-service
+    environment:
+      - NODE_ENV=development
+      - AWS_REGION=us-east-1
+    volumes:
+      - ~/.aws:/home/nodejs/.aws:ro
+    networks:
+      - retail-network
+
+  # Catalog Service - Product management
+  catalog-service:
+    build: ./catalog-service
+    ports:
+      - "3002:80"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - retail-network
+
+  # Cart Service - Shopping cart management
+  cart-service:
+    build: ./cart-service
+    ports:
+      - "3003:80"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - retail-network
+
+  # Orders Service - Order processing (placeholder)
+  orders-service:
+    image: nginx:alpine
+    ports:
+      - "3004:80"
+    volumes:
+      - ./mock-services/orders:/usr/share/nginx/html
+    networks:
+      - retail-network
+
+  # Checkout Service - Payment processing (placeholder)
+  checkout-service:
+    image: nginx:alpine
+    ports:
+      - "3005:80"
+    volumes:
+      - ./mock-services/checkout:/usr/share/nginx/html
+    networks:
+      - retail-network
+
+  # Auth Service - Authentication (placeholder)
+  auth-service:
+    image: nginx:alpine
+    ports:
+      - "3006:80"
+    volumes:
+      - ./mock-services/auth:/usr/share/nginx/html
+    networks:
+      - retail-network
+
+networks:
+  retail-network:
+    driver: bridge
+
+volumes:
+  aws-credentials:
+    external: false
