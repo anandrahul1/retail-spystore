@@ -67,10 +67,11 @@ After deployment, the script will provide:
 - **Multi-Agent System**:
   - 🔍 **Product Expert**: Deep product knowledge and recommendations
   - 🛒 **Shopping Assistant**: Cart and order management
-  - 🎯 **Customer Service**: General support and guidance
+  - 🎯 **Customer Service**: General support, guidance, and user account management
 - **Natural Conversations**: Ask questions in plain English
 - **Context Awareness**: Remembers conversation history
 - **Smart Routing**: Automatically directs queries to appropriate agent
+- **User Profile Access**: View account details and personal information through chat
 
 ### 🛒 Shopping Experience
 - **Interactive Cart**: Add, remove, update quantities
@@ -202,6 +203,15 @@ Would you like details on either of these?"
 User: "Add the button camera to my cart"
 AI: "🛒 I'll help you add the Button Camera to your cart! 
 Let me process that for you..."
+
+User: "Show me my profile"
+AI: "👤 **Your Spy Gadgets Store Profile**
+**Personal Information:**
+• **Name:** Agent Smith
+• **Email:** agent.smith@spystore.com
+• **Account Status:** ✅ Active
+• **Member Since:** January 15, 2024
+What would you like to do next?"
 ```
 
 ### API Examples

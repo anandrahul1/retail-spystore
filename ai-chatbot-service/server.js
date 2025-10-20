@@ -88,13 +88,15 @@ app.post('/chat/start', async (req, res) => {
 I'm actually a team of specialized AI agents:
 • 🔍 **Product Expert** - Deep knowledge about spy gadgets and specifications
 • 🛒 **Shopping Assistant** - Help with cart, orders, and purchases  
-• 🎯 **Customer Service** - General support and guidance
+• 🎯 **Customer Service** - General support, account information, and guidance
 
 I can help you with natural conversations about:
 • Finding the perfect spy gadgets for your missions
 • Detailed product comparisons and recommendations
 • Adding items to cart and managing orders
 • Technical specifications and use cases
+• Viewing your account and profile information
+• General customer support
 
 What spy gadget adventure can I help you with today?`,
             timestamp: new Date().toISOString(),
