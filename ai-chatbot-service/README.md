@@ -7,7 +7,7 @@ An intelligent chatbot service powered by Amazon Bedrock Agents for the Spy Gadg
 ### 🤖 Multi-Agent Architecture
 - **Product Expert Agent**: Deep knowledge about spy gadgets, specifications, and recommendations
 - **Shopping Assistant Agent**: Handles cart operations, orders, and purchase assistance  
-- **Customer Service Agent**: General support, guidance, and help
+- **Customer Service Agent**: General support, guidance, help, and user account management
 
 ### 🧠 Amazon Bedrock Integration
 - Powered by Amazon Bedrock Agents for advanced AI capabilities
@@ -25,7 +25,8 @@ An intelligent chatbot service powered by Amazon Bedrock Agents for the Spy Gadg
 - Seamless integration with existing retail microservices
 - Product catalog access for real-time inventory
 - Cart and order management capabilities
-- Authentication service integration
+- Authentication service integration for user profile access
+- Secure user data retrieval and display
 
 ## API Endpoints
 
@@ -177,7 +178,41 @@ Agent: "🛒 I'd be happy to help you add items to your cart! To add a specific 
 ### Customer Service
 ```
 User: "Hello"
-Agent: "👋 Hello! Welcome to Spy Gadgets Store! I'm your AI customer service assistant. I'm here to help you with finding the perfect spy gadgets, product information, shopping assistance, and general questions."
+Agent: "👋 Hello! Welcome to Spy Gadgets Store! I'm your AI customer service assistant. I'm here to help you with finding the perfect spy gadgets, product information, shopping assistance, account information, and general questions."
+```
+
+### User Profile Access
+```
+User: "Show me my profile"
+Agent: "👤 **Your Spy Gadgets Store Profile**
+
+**Personal Information:**
+• **Name:** John Doe
+• **Email:** john.doe@email.com
+• **Phone:** +1-555-0123
+
+**Account Details:**
+• **User ID:** abc-123-def
+• **Role:** Customer
+• **Account Status:** ✅ Active
+• **Email Verified:** ✅ Verified
+
+**Activity:**
+• **Member Since:** January 15, 2024
+• **Last Login:** March 10, 2024
+
+**What would you like to do?**
+• Update your profile information
+• Change your password
+• View your order history
+• Browse spy gadgets
+• Get shopping assistance"
+```
+
+### Authentication Required
+```
+User: "What are my account details?"
+Agent: "🔐 I'd love to show you your profile information, but I need to verify your identity first! To view your account details, you'll need to log in to your account. Once you're logged in, I can show you your personal information, account status, preferences, and more."
 ```
 
 ## Future Enhancements

@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid');
+const fetch = require('node-fetch');
 
 class BedrockAgentManager {
     constructor(microservices) {
@@ -69,6 +70,22 @@ class BedrockAgentManager {
     async routeToAgent(message, conversationHistory) {
         const lowerMessage = message.toLowerCase();
         
+        // User profile/account-related queries
+        if (lowerMessage.includes('profile') ||
+            lowerMessage.includes('account') ||
+            lowerMessage.includes('my details') ||
+            lowerMessage.includes('my info') ||
+            lowerMessage.includes('personal information') ||
+            lowerMessage.includes('who am i') ||
+            lowerMessage.includes('my data') ||
+            lowerMessage.includes('account details') ||
+            lowerMessage.includes('user info') ||
+            lowerMessage.includes('show me my') ||
+            lowerMessage.includes('my profile') ||
+            lowerMessage.includes('my account')) {
+            return 'customerService';
+        }
+        
         // Product-related queries
         if (lowerMessage.includes('product') || 
             lowerMessage.includes('gadget') || 
@@ -132,7 +149,7 @@ class BedrockAgentManager {
                 return await this.handleShoppingAssistantQuery(message, lowerMessage, userId);
             
             case 'customerService':
-                return await this.handleCustomerServiceQuery(message, lowerMessage);
+                return await this.handleCustomerServiceQuery(message, lowerMessage, userId);
             
             default:
                 return await this.fallbackResponse(message, agentType);
@@ -243,7 +260,23 @@ What shopping task can I help you with today?`,
         };
     }
 
-    async handleCustomerServiceQuery(message, lowerMessage) {
+    async handleCustomerServiceQuery(message, lowerMessage, userId) {
+        // Check if this is a profile/account related query
+        if (lowerMessage.includes('profile') ||
+            lowerMessage.includes('account') ||
+            lowerMessage.includes('my details') ||
+            lowerMessage.includes('my info') ||
+            lowerMessage.includes('personal information') ||
+            lowerMessage.includes('who am i') ||
+            lowerMessage.includes('my data') ||
+            lowerMessage.includes('account details') ||
+            lowerMessage.includes('user info') ||
+            lowerMessage.includes('show me my') ||
+            lowerMessage.includes('my profile') ||
+            lowerMessage.includes('my account')) {
+            return await this.handleUserProfileQuery(message, lowerMessage, userId);
+        }
+        
         if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
             return {
                 content: `👋 Hello! Welcome to Spy Gadgets Store! I'm your AI customer service assistant.
@@ -252,6 +285,7 @@ I'm here to help you with:
 • Finding the perfect spy gadgets for your needs
 • Product information and comparisons
 • Shopping assistance and cart management
+• Viewing your account and profile information
 • General questions about our store
 
 What can I help you discover today?`,
@@ -274,6 +308,11 @@ What can I help you discover today?`,
 • "View my cart"
 • "Help me checkout"
 
+**Account & Profile:**
+• "Show me my profile"
+• "What are my account details?"
+• "Who am I?"
+
 **Information:**
 • "Tell me about this product"
 • "What's popular?"
@@ -286,12 +325,178 @@ What would you like help with?`,
         }
         
         return {
-            content: `🎯 I'm your customer service assistant! I can help you navigate our spy gadget store, answer questions about products, assist with shopping, or provide general support.
+            content: `🎯 I'm your customer service assistant! I can help you navigate our spy gadget store, answer questions about products, assist with shopping, view your account information, or provide general support.
 
 What can I help you with today?`,
             agent: 'customerService',
             type: 'general_support'
         };
+    }
+
+    async handleUserProfileQuery(message, lowerMessage, userId) {
+        try {
+            // Check if user is authenticated
+            if (!userId || userId === 'anonymous') {
+                return {
+                    content: `🔐 I'd love to show you your profile information, but I need to verify your identity first!
+
+To view your account details, you'll need to:
+• Log in to your account
+• Provide your user credentials
+
+Once you're logged in, I can show you:
+• Your personal information (name, email, phone)
+• Account status and preferences
+• Registration date and activity
+• Profile settings
+
+Would you like help with logging in, or do you have other questions I can assist with?`,
+                    agent: 'customerService',
+                    type: 'authentication_required',
+                    actions: ['login', 'register', 'help']
+                };
+            }
+
+            console.log(`🔍 Fetching profile for user: ${userId}`);
+            
+            // Fetch user profile from auth service
+            const response = await fetch(`${this.microservices.auth}/auth/users/${userId}`);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    return {
+                        content: `❌ I couldn't find your user profile. This might be because:
+• Your account may not exist in our system
+• There might be a temporary issue with our user database
+
+Would you like me to help you with:
+• Creating a new account
+• Troubleshooting login issues
+• General account support
+
+What would you like to do?`,
+                        agent: 'customerService',
+                        type: 'profile_not_found',
+                        actions: ['register', 'login_help', 'contact_support']
+                    };
+                } else if (response.status === 403) {
+                    return {
+                        content: `🔒 I don't have permission to access your profile information. This usually means:
+• Your session may have expired
+• You might need to log in again
+• There could be an authentication issue
+
+Please try logging in again, and then ask me to show your profile. I'll be happy to help once you're properly authenticated!`,
+                        agent: 'customerService',
+                        type: 'access_denied',
+                        actions: ['login', 'help']
+                    };
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            }
+
+            const userData = await response.json();
+            const user = userData.user;
+
+            if (!user) {
+                throw new Error('No user data received from auth service');
+            }
+
+            // Format user profile information
+            const profileInfo = this.formatUserProfile(user);
+            
+            return {
+                content: profileInfo,
+                agent: 'customerService',
+                type: 'profile_display',
+                actions: ['update_profile', 'change_password', 'view_orders'],
+                userData: {
+                    userId: user.id,
+                    name: `${user.firstName} ${user.lastName}`,
+                    email: user.email,
+                    role: user.role
+                }
+            };
+
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+            
+            return {
+                content: `⚠️ I'm having trouble accessing your profile information right now. This could be due to:
+• A temporary connection issue with our user database
+• System maintenance in progress
+• Network connectivity problems
+
+Please try again in a moment, or let me know if you need help with something else. I'm still here to assist you with:
+• Product searches and recommendations
+• Shopping cart assistance
+• General store information
+
+What else can I help you with?`,
+                agent: 'customerService',
+                type: 'profile_error',
+                actions: ['try_again', 'browse_products', 'contact_support']
+            };
+        }
+    }
+
+    formatUserProfile(user) {
+        const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        const lastLogin = user.lastLoginAt 
+            ? new Date(user.lastLoginAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })
+            : 'Never';
+
+        let profileContent = `👤 **Your Spy Gadgets Store Profile**
+
+**Personal Information:**
+• **Name:** ${user.firstName} ${user.lastName}
+• **Email:** ${user.email}`;
+
+        if (user.phone) {
+            profileContent += `\n• **Phone:** ${user.phone}`;
+        }
+
+        profileContent += `
+
+**Account Details:**
+• **User ID:** ${user.id}
+• **Role:** ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+• **Account Status:** ${user.isActive ? '✅ Active' : '❌ Inactive'}
+• **Email Verified:** ${user.isEmailVerified ? '✅ Verified' : '⚠️ Not Verified'}
+
+**Activity:**
+• **Member Since:** ${joinDate}
+• **Last Login:** ${lastLogin}`;
+
+        if (user.profile && user.profile.preferences && Object.keys(user.profile.preferences).length > 0) {
+            profileContent += `\n\n**Preferences:**`;
+            Object.entries(user.profile.preferences).forEach(([key, value]) => {
+                profileContent += `\n• **${key}:** ${value}`;
+            });
+        }
+
+        profileContent += `
+
+**What would you like to do?**
+• Update your profile information
+• Change your password
+• View your order history
+• Browse spy gadgets
+• Get shopping assistance
+
+Just let me know how I can help! 🕵️`;
+
+        return profileContent;
     }
 
     async fallbackResponse(message, agentType) {
